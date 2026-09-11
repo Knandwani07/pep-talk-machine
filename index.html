@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pep Talk Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF4EF;
+    --machine: #E2EDE5;
+    --machine-hi: #F4F9F5;
+    --machine-line: #C9DBCE;
+    --slot-bg: #DCE9E0;
+    --tray-bg: #F8FBF9;
+    --paper: #FFFFFF;
+    --paper-shadow: #E7E1CE;
+    --ink: #33403A;
+    --ink-soft: #8A9A8F;
+    --marigold: #E9AD54;
+    --marigold-deep: #C98A2E;
+    --mint: #4F9A80;
+    --text-main: #33403A;
+    --text-soft: #7C8D82;
+    --red: #D97A68;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    background:
+      radial-gradient(ellipse at 50% -10%, #FAFDFB 0%, var(--bg) 55%);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    top: -18%;
+    left: -12%;
+    width: 55vw;
+    height: 55vw;
+    max-width: 560px;
+    max-height: 560px;
+    background: radial-gradient(circle, rgba(79,154,128,0.22), transparent 70%);
+    animation: drift-one 24s ease-in-out infinite;
+  }
+
+  body::after {
+    bottom: -22%;
+    right: -14%;
+    width: 50vw;
+    height: 50vw;
+    max-width: 520px;
+    max-height: 520px;
+    background: radial-gradient(circle, rgba(233,173,84,0.16), transparent 70%);
+    animation: drift-two 28s ease-in-out infinite;
+  }
+
+  @keyframes drift-one {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(6%, 8%) scale(1.12); }
+  }
+
+  @keyframes drift-two {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-7%, -6%) scale(1.08); }
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .heading {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .heading h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: var(--text-main);
+  }
+
+  .heading p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-soft);
+  }
+
+  /* ---- machine shell ---- */
+  .machine {
+    position: relative;
+    background: linear-gradient(180deg, var(--machine-hi) 0%, var(--machine) 14%, var(--machine) 100%);
+    border-radius: 22px;
+    padding: 22px 20px 26px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.8) inset,
+      0 -1px 0 rgba(90,120,100,0.12) inset,
+      0 16px 34px -18px rgba(80,110,95,0.28);
+    animation: breathe 7s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.8) inset,
+        0 -1px 0 rgba(90,120,100,0.12) inset,
+        0 16px 34px -18px rgba(80,110,95,0.28);
+    }
+    50% {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.8) inset,
+        0 -1px 0 rgba(90,120,100,0.12) inset,
+        0 18px 40px -16px rgba(79,154,128,0.22);
+    }
+  }
+
+  .screw {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #FBFDFC, #C4D3C9);
+  }
+  .screw.tl { top: 10px; left: 10px; }
+  .screw.tr { top: 10px; right: 10px; }
+  .screw.bl { bottom: 10px; left: 10px; }
+  .screw.br { bottom: 10px; right: 10px; }
+
+  .led-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-left: 2px;
+  }
+  .led {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #C4D3C9;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .led.on {
+    background: var(--mint);
+    box-shadow: 0 0 6px var(--mint);
+  }
+  .led-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  /* ---- input tray ---- */
+  .tray {
+    background: var(--tray-bg);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid var(--machine-line);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+
+  .chip {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--machine-line);
+    background: #EEF6F0;
+    color: var(--mint);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .chip:hover { background: #DFEDE3; border-color: #A9C7B4; }
+  .chip:active { transform: scale(0.96); }
+
+  textarea {
+    width: 100%;
+    min-height: 64px;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+    font-size: 14.5px;
+    padding: 12px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--machine-line);
+    background: #FFFFFF;
+    color: var(--text-main);
+    outline: none;
+  }
+  textarea::placeholder { color: #9AACA1; }
+  textarea:focus { border-color: var(--mint); }
+
+  button.go {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(180deg, var(--marigold) 0%, var(--marigold-deep) 100%);
+    color: #402A08;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #A96F1F, 0 8px 16px -6px rgba(180,130,50,0.35);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+  }
+  button.go:hover { background: linear-gradient(180deg, #F0BC70 0%, var(--marigold-deep) 100%); }
+  button.go:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 #A96F1F, 0 4px 10px -4px rgba(180,130,50,0.35);
+  }
+  button.go:disabled {
+    background: #C7D6CD;
+    color: #90A69A;
+    box-shadow: 0 3px 0 #B3C4B9;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ---- output slot ---- */
+  .slot {
+    margin-top: 18px;
+    background: var(--slot-bg);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: inset 0 3px 8px rgba(80,110,95,0.18);
+    min-height: 8px;
+  }
+
+  .ticket-wrap {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .ticket-wrap.show { max-height: 400px; }
+
+  .ticket {
+    position: relative;
+    margin-top: 10px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 2px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 10px 18px -12px rgba(80,110,95,0.3);
+  }
+
+  .ticket::before, .ticket::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 9px;
+    background-image: radial-gradient(circle at 6px 6px, var(--slot-bg) 5.5px, transparent 6px);
+    background-size: 13px 13px;
+    background-position: 0 0;
+  }
+  .ticket::before { top: -5px; }
+  .ticket::after { bottom: -5px; transform: rotate(180deg); }
+
+  .ticket-head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--paper-shadow);
+  }
+
+  .ticket-body {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .ticket-foot {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--paper-shadow);
+  }
+
+  /* ---- error ---- */
+  .error-wrap {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .error-wrap.show { max-height: 200px; }
+
+  .error {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #FBECE7;
+    border-left: 3px solid var(--red);
+    color: #8A4A3D;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--text-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticket-wrap, .error-wrap, button.go { transition: none; }
+    body::before, body::after, .machine { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="heading">
+    <h1>Pep Talk Machine</h1>
+    <p>Feed it what you're up against. It prints back courage.</p>
+  </div>
+
+  <div class="machine">
+    <span class="screw tl"></span>
+    <span class="screw tr"></span>
+    <span class="screw bl"></span>
+    <span class="screw br"></span>
+
+    <div class="led-row">
+      <span class="led" id="led"></span>
+      <span class="led-label">PT-1000 // ready</span>
+    </div>
+
+    <div class="tray">
+      <div class="chips">
+        <div class="chip" data-text="a job interview">job interview</div>
+        <div class="chip" data-text="Monday morning">Monday morning</div>
+        <div class="chip" data-text="a hard conversation">hard conversation</div>
+        <div class="chip" data-text="a presentation">presentation</div>
+      </div>
+
+      <textarea id="situation" placeholder="e.g. my first day at a new job"></textarea>
+
+      <button class="go" id="goBtn">Get a pep talk</button>
+    </div>
+
+    <div class="slot">
+      <div class="ticket-wrap" id="resultWrap">
+        <div class="ticket">
+          <div class="ticket-head">✦ your pep talk ✦</div>
+          <div class="ticket-body" id="result"></div>
+          <div class="ticket-foot">thank you — come again</div>
+        </div>
+      </div>
+      <div class="error-wrap" id="errorWrap">
+        <div class="error" id="error"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Powered by Amazon Bedrock (Nova)</footer>
+</div>
+
+<script>
+  const API_URL = "Replace this with your API Gateway invoke URL";
+
+  const textarea = document.getElementById('situation');
+  const goBtn = document.getElementById('goBtn');
+  const result = document.getElementById('result');
+  const resultWrap = document.getElementById('resultWrap');
+  const error = document.getElementById('error');
+  const errorWrap = document.getElementById('errorWrap');
+  const led = document.getElementById('led');
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      textarea.value = chip.dataset.text;
+      textarea.focus();
+    });
+  });
+
+  goBtn.addEventListener('click', async () => {
+    const situation = textarea.value.trim();
+    resultWrap.classList.remove('show');
+    errorWrap.classList.remove('show');
+
+    if (!situation) {
+      error.textContent = "Type or pick a situation first.";
+      errorWrap.classList.add('show');
+      return;
+    }
+
+    if (API_URL.includes("PASTE_YOUR_API_URL_HERE")) {
+      error.textContent = "API_URL isn't set yet — edit the API_URL constant near the bottom of this file.";
+      errorWrap.classList.add('show');
+      return;
+    }
+
+    goBtn.disabled = true;
+    goBtn.textContent = "Printing…";
+    led.classList.add('on');
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ situation })
+      });
+
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+
+      const data = await res.json();
+      result.textContent = data.pep_talk;
+      resultWrap.classList.add('show');
+    } catch (err) {
+      error.textContent = "Something went wrong: " + err.message + " — check the browser console and confirm CORS is enabled on your API.";
+      errorWrap.classList.add('show');
+    } finally {
+      goBtn.disabled = false;
+      goBtn.textContent = "Get a pep talk";
+      led.classList.remove('on');
+    }
+  });
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      goBtn.click();
+    }
+  });
+</script>
+
+</body>
+</html>
