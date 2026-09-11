@@ -4,11 +4,7 @@
 
 Pep Talk Machine is a small, single-purpose AI web app that generates short, personalized pep talks based on a situation you provide.
 
-Instead of being a general-purpose chatbot, it focuses on one thing: turning a few words of context into a concise and specific response.
-
-## Live Demo
-
-[Launch Pep Talk Machine](http://pep-talk-ai-aws-builder-center-weekend-challenge.s3-website-us-east-1.amazonaws.com/)
+Instead of being a general-purpose chatbot, it focuses on one simple task: turning a few words of context into a concise and specific response.
 
 ## Features
 
@@ -17,44 +13,70 @@ Instead of being a general-purpose chatbot, it focuses on one thing: turning a f
 - Enter a custom situation
 - Receive short, tailored responses
 - Simple and responsive interface
-- Fully serverless AWS architecture
+- Serverless AWS architecture
 
 ## AWS Architecture
 
-The application uses Amazon S3, Amazon API Gateway, AWS Lambda, Amazon Bedrock, and IAM.
+The application uses:
 
-For the complete architecture diagram and explanation, see:
+- **Amazon S3** — Hosts the static frontend
+- **Amazon API Gateway** — Provides the HTTP API endpoint
+- **AWS Lambda** — Handles the backend logic
+- **Amazon Bedrock** — Generates responses using Nova Micro
+- **IAM** — Provides the required Lambda permissions
 
-[Architecture Overview](ARCHITECTURE.md)
+For the complete architecture and request flow, see:
 
-## AWS Services Used
-
-| Service | Purpose |
-|---|---|
-| Amazon S3 | Hosts the static frontend |
-| Amazon API Gateway | Provides the HTTP API endpoint |
-| AWS Lambda | Processes requests and invokes Bedrock |
-| Amazon Bedrock | Generates pep talks using Nova Micro |
-| IAM | Provides Lambda with permission to invoke Bedrock |
+**[ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ## How It Works
 
-1. The user selects a preset situation or enters a custom situation.
-2. The frontend sends an HTTP POST request to API Gateway.
-3. API Gateway routes the request to AWS Lambda.
+1. The user selects a preset situation or enters a custom one.
+2. The frontend sends the situation to API Gateway.
+3. API Gateway routes the request to Lambda.
 4. Lambda builds the prompt and invokes Amazon Bedrock.
 5. Nova Micro generates the pep talk.
-6. Lambda returns the generated response.
-7. The frontend displays the pep talk to the user.
+6. Lambda returns the response to the frontend.
+7. The generated pep talk is displayed to the user.
 
-## Project Structure
+## Repository Contents
 
 ```text
 pep-talk-machine/
-├── index.html
-├── README.md
+│
 ├── ARCHITECTURE.md
-├── LICENSE
-├── .gitignore
-└── docs/
-    └── architecture.png
+├── README.md
+├── cleanup-guide.md
+├── deployment-guide.md
+├── execution-workflow.md
+├── frontend-explanation.md
+└── index.html
+````
+
+### Documentation
+
+| File                      | Description                                                |
+| ------------------------- | ---------------------------------------------------------- |
+| `ARCHITECTURE.md`         | Architecture diagram and explanation of the AWS components |
+| `deployment-guide.md`     | Steps for deploying the application on AWS                 |
+| `execution-workflow.md`   | Explains how a request moves through the application       |
+| `frontend-explanation.md` | Explains the role of `index.html`                          |
+| `cleanup-guide.md`        | Steps for cleaning up the AWS resources                    |
+
+## Technologies
+
+* HTML
+* CSS
+* JavaScript
+* Python 3.13
+* Amazon S3
+* Amazon API Gateway
+* AWS Lambda
+* Amazon Bedrock
+* IAM
+
+## AWS Deploy Your First App Weekend Challenge
+
+This project was built as part of the **AWS Deploy Your First App Weekend Challenge**.
+
+The challenge focuses on building and deploying a real application on AWS, documenting the process, and sharing what was learned along the way.
